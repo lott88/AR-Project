@@ -1,65 +1,86 @@
 
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-    <!-- Load A-Frame -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-    <!-- Load MindAR -->
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
 
-    <!-- Makes the camera fill the screen -->
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
+    a-scene {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
 
-      a-scene {
-        width: 100%;
-        height: 100vh;
-      }
-    </style>
+</head>
 
-  </head>
+<body>
 
-  <body>
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind"
+    embedded
+    color-space="sRGB"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
-    <a-scene
-      mindar-image="imageTargetSrc: ./targets.mind"
-      embedded
-      color-space="sRGB"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false">
+    <!-- Overlay image -->
+    <a-assets>
+      <img id="secret-image" src="./your-ar-image.png">
+    </a-assets>
 
-      <!-- Overlay image -->
-      <a-assets>
-        <img id="secret-image" src="./your-ar-image.png">
-      </a-assets>
+    <!-- Camera -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
 
-      <!-- Camera -->
-      <a-camera
+    <!-- Target tracking -->
+    <a-entity
+      id="tracked-target"
+      mindar-image-target="targetIndex: 0">
+
+      <!-- Image overlay -->
+      <a-image
+        id="overlay"
+        src="#secret-image"
         position="0 0 0"
-        look-controls="enabled: false">
-      </a-camera>
+        width="1"
+        height="0.552"
+        material="transparent: true; opacity: 0.8; alphaTest: 0.01"
+        visible="true">
+      </a-image>
 
-      <!-- Image recognition -->
-      <a-entity mindar-image-target="targetIndex: 0">
+    </a-entity>
 
-        <!-- Image displayed when target is recognized -->
-        <a-image
-          src="#secret-image"
-          position="0 0 0"
-          height="0.552"
-          width="1">
-        </a-image>
+  </a-scene>
 
-      </a-entity>
+  <script>
+    const target = document.querySelector("#tracked-target");
+    const overlay = document.querySelector("#overlay");
 
-    </a-scene>
+    let targetFound = false;
 
-  </body>
+    target.addEventListener("targetFound", () => {
+      targetFound = true;
+      overlay.setAttribute("visible", true);
+    });
+
+    target.addEventListener("targetLost", () => {
+      if (targetFound) {
+        overlay.setAttribute("visible", true);
+      }
+    });
+  </script>
+
+</body>
 </html>
